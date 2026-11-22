@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide — Actor Tally</title>
+<meta name="description" content="Step-by-step guide to every Actor Tally feature, with screenshots: logging, half-star ratings, the dashboard, Explore filters, the places map timeline, tag management, backups, pages, PIN and quick hide.">
+<style>
+  :root{
+    --bg:#0d0f13; --panel:#14171d; --panel2:#181c23; --ink:#e8e6e1; --muted:#9aa0aa;
+    --amber:#f5a623; --amber-soft:#f5a62322; --green:#57c785; --line:#242832; --maxw:960px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  a{color:var(--amber); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 22px}
+  .narrow{max-width:780px}
+  .section{padding:60px 0; border-top:1px solid var(--line)}
+  h1{color:#fff}
+  h2{font-size:26px; margin:0 0 8px; color:#fff; line-height:1.25}
+  h3{font-size:17px; margin:0 0 6px; color:#fff}
+  p{margin:0 0 14px}
+  .muted{color:var(--muted)}
+  code,kbd{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.9em}
+  kbd{background:var(--panel2); border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:1px 6px; color:var(--ink)}
+
+  nav.top{display:flex; align-items:center; gap:12px; padding:22px 0}
+  .tally{width:32px; height:32px; flex:0 0 auto}
+  nav.top b{font-size:17px}
+  nav.top b a{color:var(--ink)}
+  nav.top .sp{flex:1}
+  nav.top a.nl{color:var(--muted); font-size:14px; margin-left:18px}
+  nav.top a.nl.on{color:var(--ink)}
+
+  .btns{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom:16px}
+  .btn{display:inline-block; padding:12px 22px; border-radius:10px; font-weight:600; font-size:15px;
+    background:var(--amber); color:#0d0f13; border:1px solid var(--amber)}
+  .btn:hover{text-decoration:none; filter:brightness(1.06)}
+  .btn.ghost{background:transparent; color:var(--muted); border:1px solid var(--line)}
+  .btn.ghost:hover{color:var(--ink); border-color:var(--muted)}
+
+  /* store buttons: live = solid, soon = dashed with a status line */
+  .stores{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:0 auto 14px; max-width:860px}
+  .store{display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; text-align:left;
+    background:var(--panel); border:1px solid var(--line); color:var(--ink); min-width:0}
+  .store:hover{text-decoration:none; border-color:var(--amber)}
+  .store svg{flex:0 0 auto; width:30px; height:30px}
+  .store .t{display:flex; flex-direction:column; line-height:1.25; min-width:0}
+  .store .t b{font-size:15px}
+  .store .t small{font-size:12px; color:var(--muted); white-space:nowrap}
+  .store .st{display:inline-flex; align-items:center; gap:6px}
+  .store .st:before{content:""; width:7px; height:7px; border-radius:50%; background:var(--green)}
+  .store.live{border-color:#f5a62366}
+  .store.soon{border-style:dashed; cursor:default}
+  .store.soon:hover{border-color:var(--line)}
+  .store.soon svg{opacity:.55}
+  .store.soon .st:before{background:transparent; border:1.5px solid var(--amber)}
+  .stores-note{font-size:13px; color:var(--muted); max-width:70ch; margin:0 auto}
+
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:24px}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px 22px}
+  .card p{margin:0; color:var(--muted); font-size:15px}
+  .card h3{margin-bottom:8px}
+  .card .tag{display:inline-block; font-size:11px; font-weight:700; letter-spacing:.6px; color:var(--amber);
+    background:var(--amber-soft); border-radius:5px; padding:1px 7px; margin-bottom:8px}
+
+  ul.plain{list-style:none; padding:0; margin:14px 0 0}
+  ul.plain li{position:relative; padding-left:20px; margin:0 0 10px; color:var(--muted)}
+  ul.plain li:before{content:""; position:absolute; left:0; top:11px; width:7px; height:7px; background:var(--amber); border-radius:2px}
+  ul.plain b{color:var(--ink)}
+  .feat{columns:2; column-gap:34px}
+  .feat li{break-inside:avoid}
+
+  figure{margin:22px 0; }
+  figure img{display:block; max-width:100%; height:auto; border-radius:12px; border:1px solid var(--line); background:var(--panel)}
+  figure.center img{margin:0 auto}
+  figure.mid img{max-width:560px; margin:0 auto}
+  figure.mid figcaption{text-align:center}
+  figcaption{font-size:13px; color:var(--muted); margin-top:8px}
+  figure.center figcaption{text-align:center}
+  .shots{display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:start; margin:30px 0 0}
+  .shots figure{margin:0}
+
+  ol.steps-list{counter-reset:s; list-style:none; padding:0; margin:14px 0 18px}
+  ol.steps-list>li{counter-increment:s; position:relative; padding:0 0 0 40px; margin:0 0 12px; color:var(--muted)}
+  ol.steps-list>li:before{content:counter(s); position:absolute; left:0; top:1px; width:26px; height:26px; border-radius:50%;
+    background:var(--amber-soft); color:var(--amber); font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center}
+  ol.steps-list b{color:var(--ink)}
+  .tip{background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--amber); border-radius:10px; padding:12px 16px; margin:16px 0; color:var(--muted); font-size:15px}
+  .tip b{color:var(--ink)}
+
+  details{border:1px solid var(--line); border-radius:10px; padding:14px 18px; margin:0 0 10px; background:var(--panel)}
+  details summary{cursor:pointer; font-weight:600; color:#fff; list-style:none}
+  details summary::-webkit-details-marker{display:none}
+  details summary:before{content:"+"; color:var(--amber); font-weight:700; margin-right:10px}
+  details[open] summary:before{content:"–"}
+  details p{margin:12px 0 0; color:var(--muted); font-size:15px}
+
+  footer{border-top:1px solid var(--line); padding:30px 0 60px; color:var(--muted); font-size:13px}
+  footer a{color:var(--muted); text-decoration:underline; margin-right:16px}
+
+  @media(max-width:860px){ .stores{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  @media(max-width:720px){
+    .grid{grid-template-columns:1fr}
+    .feat{columns:1}
+    .shots{grid-template-columns:1fr}
+    .shots figure.popup img{max-width:300px}
+    nav.top{flex-wrap:wrap; row-gap:2px}
+    nav.top .sp{flex-basis:100%; height:0}
+    nav.top a.nl{margin:2px 14px 0 0; font-size:13px}
+  }
+  @media(max-width:420px){ .stores{grid-template-columns:1fr} }
+
+  .hero{padding:44px 0 26px}
+  .hero h1{font-size:36px; line-height:1.15; margin:0 0 12px}
+  .hero p{color:var(--muted); font-size:17px; max-width:62ch}
+  .toc{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:24px 0 10px; padding:0; list-style:none; counter-reset:t}
+  .toc li{counter-increment:t}
+  .toc a{display:block; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:10px 14px; color:var(--ink); font-size:14px}
+  .toc a:before{content:counter(t) ". "; color:var(--amber); font-weight:700}
+  .toc a:hover{border-color:var(--amber); text-decoration:none}
+  .two{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; align-items:start}
+  .two figure{margin-top:6px}
+  h3.sub{margin-top:30px}
+  @media(max-width:720px){ .toc{grid-template-columns:1fr 1fr} .two{grid-template-columns:1fr} }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <svg class="tally" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="40" height="40" rx="9" fill="#14171d"/>
+      <g stroke="#f5a623" stroke-width="2.6" stroke-linecap="round">
+        <line x1="12" y1="11" x2="12" y2="29"/><line x1="17" y1="11" x2="17" y2="29"/>
+        <line x1="22" y1="11" x2="22" y2="29"/><line x1="27" y1="11" x2="27" y2="29"/>
+        <line x1="9" y1="29" x2="30" y2="11"/>
+      </g>
+    </svg>
+    <b><a href="./index.html">Actor Tally</a></b>
+    <span class="sp"></span>
+    <a class="nl on" href="./guide.html">Guide</a>
+    <a class="nl" href="./changelog.html">What's new</a>
+    <a class="nl" href="./privacy.html">Privacy</a>
+    <a class="nl" href="./support.html">Support</a>
+  </nav>
+
+  <header class="hero">
+    <h1>Guide</h1>
+    <p>Every feature of Actor Tally 4.2, step by step. The screenshots are the real extension with made-up demo data — your own will show your names and numbers.</p>
+    <ol class="toc">
+      <li><a href="#install">Install</a></li>
+      <li><a href="#log">Log your first entry</a></li>
+      <li><a href="#ratings">Half-star ratings</a></li>
+      <li><a href="#dashboard">The dashboard</a></li>
+      <li><a href="#explore">Explore and filters</a></li>
+      <li><a href="#edit">Fix any log</a></li>
+      <li><a href="#places">Places and the map timeline</a></li>
+      <li><a href="#tags">Manage tags</a></li>
+      <li><a href="#settings">Settings</a></li>
+      <li><a href="#backup">Backups and the reminder</a></li>
+      <li><a href="#pages">Four pages, your own word</a></li>
+      <li><a href="#privacy">PIN and quick hide</a></li>
+    </ol>
+  </header>
+
+  <section class="section" id="install">
+    <h2>1. Install</h2>
+    <p class="muted">Pick your browser's store. Firefox and Opera listings are in review; the buttons switch on when they're approved.</p>
+    <div class="stores">
+      <a class="store live" id="chrome-link" href="https://chromewebstore.google.com/detail/odpeanknkiiidhinhgnpkpablhhobbhe"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M6 11h5a3 3 0 1 1 6 0h5v5a3 3 0 1 1 0 6v5H17a3 3 0 1 0-6 0H6v-5a3 3 0 1 0 0-6z" transform="translate(1 -2)"/></svg><span class="t"><b>Chrome</b><small class="st">Chrome Web Store</small></span></a>
+      <a class="store live" id="edge-link" href="https://microsoftedge.microsoft.com/addons/detail/actor-tally/iocpmmkcjhdlaicbidalhcfhmjaicico"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M6 11h5a3 3 0 1 1 6 0h5v5a3 3 0 1 1 0 6v5H17a3 3 0 1 0-6 0H6v-5a3 3 0 1 0 0-6z" transform="translate(1 -2)"/></svg><span class="t"><b>Edge</b><small class="st">Edge Add-ons</small></span></a>
+      <!-- When Firefox is approved: change <span class="store soon" ...> to
+           <a class="store live" id="firefox-link" href="LISTING URL"> (and </span> to </a>),
+           and the small text to "Firefox Add-ons". The URL is shown on the add-on's page in the Developer Hub. -->
+      <span class="store soon" id="firefox-link" title="Submitted — waiting for Mozilla's review"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M6 11h5a3 3 0 1 1 6 0h5v5a3 3 0 1 1 0 6v5H17a3 3 0 1 0-6 0H6v-5a3 3 0 1 0 0-6z" transform="translate(1 -2)"/></svg><span class="t"><b>Firefox</b><small class="st">In review</small></span></span>
+      <!-- When Opera is approved: same change, URL https://addons.opera.com/extensions/details/actor-tally/ -->
+      <span class="store soon" id="opera-link" title="Submitted — waiting for Opera's review"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M6 11h5a3 3 0 1 1 6 0h5v5a3 3 0 1 1 0 6v5H17a3 3 0 1 0-6 0H6v-5a3 3 0 1 0 0-6z" transform="translate(1 -2)"/></svg><span class="t"><b>Opera</b><small class="st">In review</small></span></span>
+    </div>
+    <p class="stores-note">Brave, Vivaldi and most other Chromium-based browsers install it from the Chrome Web Store. Opera users can already do the same with Opera's “Install Chrome Extensions” add-on while the Opera listing is in review.</p>
+    <ol class="steps-list" style="margin-top:24px">
+      <li>Open the store page and click <b>Add to Chrome</b>, <b>Get</b> or <b>Add extension</b> (the wording depends on the store).</li>
+      <li>Confirm the permission prompt. Actor Tally asks for four permissions and no access to any website; the <a href="./privacy.html#permissions">privacy policy</a> explains each one.</li>
+      <li>Pin the icon so it's one click away: open the puzzle-piece menu in the toolbar and click the pin next to Actor Tally.</li>
+      <li>Optional: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd> opens the popup from the keyboard. You can change the shortcut in your browser's extension shortcuts page.</li>
+    </ol>
+  </section>
+  <section class="section" id="log">
+    <h2>2. Log your first entry</h2>
+    <div class="two">
+      <div>
+        <ol class="steps-list">
+          <li>Open a page with a video and click the <b>Actor Tally</b> icon. The popup reads the page title and its cast links and offers names under <b>Detected on this page</b>.</li>
+          <li><b>Tap a name</b> to select it. Tap it <b>again</b> to mark that person as a <b>co-star</b>; a third tap deselects. You can select several.</li>
+          <li>Not detected? Type in <b>Or type a name</b>. It autocompletes from everyone you've logged. For several people, separate with commas; put <code>&amp;</code> before a co-star: <code>Jane Doe, &amp;Theo Grant</code>.</li>
+          <li>Optionally rate (see <a href="#ratings">half stars</a>), set a <b>duration</b> in minutes or press <b>Start</b> to time it, choose a <b>place</b> (the icon appears once you've made places), and add <b>tags</b> — type them with commas, or tap the past-tag chips.</li>
+          <li>Press <b>Log</b>. The popup confirms with each person's running count.</li>
+        </ol>
+        <div class="tip"><b>Made a mistake?</b> Press <kbd>Ctrl</kbd>+<kbd>Z</kbd> in the popup right after logging to take the last log back.</div>
+      </div>
+      <figure class="center">
+    <img src="./img/popup.jpg" width="360" height="560" alt="The popup with Jane Doe selected, three and a half stars and the drama tag chosen" loading="lazy">
+    <figcaption>Jane Doe selected, 3½ stars, the “drama” tag ticked.</figcaption>
+  </figure>
+    </div>
+    <h3 class="sub">When a site hides its names</h3>
+    <ul class="plain">
+      <li><b>Manual picker</b> (the lines icon): the popup closes and you click a name anywhere on the page.</li>
+      <li><b>Image picker</b> (the picture icon): click an image on the page to use it as the selected person's card photo.</li>
+      <li><b>Screenshot</b> (the scissors): drag a box around part of the screen to use as the photo. Your half-filled form is kept while you do it.</li>
+      <li><b>Video position</b> (the ▶● button): when switched on, a log also stores how far into the video you were, read once when you press Log.</li>
+    </ul>
+  </section>
+  <section class="section" id="ratings">
+    <h2>3. Half-star ratings</h2>
+    <div class="two">
+      <div>
+        <ol class="steps-list">
+          <li>Click a star once for the whole value: the fourth star gives <b>4</b>.</li>
+          <li>Click the <b>same star again</b> to make it a half: <b>3½</b>.</li>
+          <li>Click it a third time to clear the rating.</li>
+        </ol>
+        <p class="muted">The same cycle works in the dashboard's rating editor and the manual log form. When editing several logs at once, type the value: <code>3.5</code> or <code>3,5</code>. Half steps get their own chips in Explore and their own bars in the chart builder.</p>
+        <p class="muted">Want to start over? <b>Settings → Star ratings → Delete all ratings</b> removes every rating on the page you're viewing; the logs stay, and undo brings the ratings back.</p>
+      </div>
+      <figure class="center">
+    <img src="./img/rating-editor.jpg" width="388" height="207" alt="The dashboard rating editor showing three and a half stars" loading="lazy">
+    <figcaption>The dashboard's rating editor: 3.5/5.</figcaption>
+  </figure>
+    </div>
+  </section>
+  <section class="section" id="dashboard">
+    <h2>4. The dashboard</h2>
+    <p class="muted">Click <b>Open stats</b> at the bottom of the popup. The dashboard opens in its own tab.</p>
+    <figure class="">
+    <img src="./img/dashboard.jpg" width="1280" height="640" alt="The dashboard header with counters, streaks, monthly goal, language flags and the settings gear" loading="lazy">
+    <figcaption>Counters, streaks and the monthly goal ring. Click the ring to set a goal; the gear opens Settings.</figcaption>
+  </figure>
+    <figure class="">
+    <img src="./img/insights.jpg" width="988" height="43" alt="A rotating insight line reading: You log most on Sundays" loading="lazy">
+    <figcaption>Insights rotate through plain-language observations about your history.</figcaption>
+  </figure>
+    <ul class="plain">
+      <li><b>Actor cards</b> show each person's count, average rating, badges and most-used tags. Sort and filter them from the bar above.</li>
+      <li><b>Activity calendar</b> colours every day by how much you logged; click a day to filter to it.</li>
+      <li><b>Time spent</b> turns durations into totals, a length distribution and a monthly trend.</li>
+      <li><b>Chart builder</b>: pick a measure, a grouping and a chart type. Tick <b>Use current Explore filters</b> to chart only what you've filtered. <b>Save as image</b> downloads it.</li>
+      <li><b>Yearly recap</b> builds story-style slides for any year, ready to save.</li>
+      <li><b>Milestones</b> and <b>badges</b> track totals, hours, places and co-star appearances.</li>
+    </ul>
+    <figure class="">
+    <img src="./img/cards.jpg" width="988" height="640" alt="Actor cards with counts, ratings, badges and sparklines" loading="lazy">
+    <figcaption>Actor cards. A card's frame and code name are set from its menu.</figcaption>
+  </figure>
+    <figure class="">
+    <img src="./img/duration.jpg" width="988" height="683" alt="The time spent panel with totals and a length distribution chart" loading="lazy">
+    <figcaption>Time spent: totals, distribution, trend.</figcaption>
+  </figure>
+    <figure class="mid">
+    <img src="./img/recap.jpg" width="988" height="810" alt="A yearly recap slide showing 150 total logs" loading="lazy">
+    <figcaption>Yearly recap.</figcaption>
+  </figure>
+    <div class="tip"><b>Rearrange it.</b> Drag any panel by the three-bar handle at its top right. Hide panels you don't use in Settings → Panels; <b>Reset layout</b> brings the default back.</div>
+  </section>
+  <section class="section" id="explore">
+    <h2>5. Explore and filters</h2>
+    <figure class="">
+    <img src="./img/explore.jpg" width="988" height="759" alt="The Explore panel filtered to the drama tag, with groups for tags, actors, sites, rating, co-stars, length, places and time of day" loading="lazy">
+    <figcaption>Explore, filtered to the “drama” tag.</figcaption>
+  </figure>
+    <ol class="steps-list">
+      <li>Click any chip — a tag, a person, a site, a rating, a place, a length or a time of day — to filter. The results list underneath updates at once.</li>
+      <li>Each group has its own switch: <b>any</b> (a log may match one of the chosen values) or <b>all</b> (it must match every one).</li>
+      <li><b>Combine groups</b> at the top decides whether every group must match or any group is enough.</li>
+      <li>Type in the search box to find a person, tag or site quickly. Click a chip again, or <b>Clear all</b>, to remove filters.</li>
+    </ol>
+  </section>
+  <section class="section" id="edit">
+    <h2>6. Fix any log</h2>
+    <div class="two">
+      <div>
+        <ol class="steps-list">
+          <li>In <b>Recent entries</b>, click a log's <b>ℹ</b> button to open its details.</li>
+          <li>Every field is listed in full: actors, rating, site, title, the whole link, video position, duration, place, tags, date and time.</li>
+          <li>Click the pencil next to a field to change it. <b>Copy all</b> copies the log as text.</li>
+          <li>To change many logs at once, press <b>Select</b> above the table, tick the logs and choose <b>Edit selected</b> or <b>Delete selected</b>.</li>
+        </ol>
+        <p class="muted"><kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes up to twenty steps and <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> redoes them. Deleted logs wait in the trash for 30 days.</p>
+        <p class="muted">Watched something away from this browser? <b>Add a log manually</b> lets you set the date, time, people and every other field yourself.</p>
+      </div>
+      <figure class="center">
+    <img src="./img/log-details.jpg" width="548" height="588" alt="The log details window listing every field with copy and edit buttons" loading="lazy">
+    <figcaption>A log's details.</figcaption>
+  </figure>
+    </div>
+  </section>
+  <section class="section" id="places">
+    <h2>7. Places and the map timeline</h2>
+    <ol class="steps-list">
+      <li>Open <b>Settings → Places → Open</b> and press <b>Add place</b>. Give it a name, an icon and a colour.</li>
+      <li>To put it on the map, type its coordinates or click the spot on the map in the editor. Places without coordinates still work as labels.</li>
+      <li>In the popup, pick the place with the place button before you log. The last one you used is remembered.</li>
+      <li>Open <b>Places map</b> on the dashboard. Each pin grows with the number of logs there.</li>
+    </ol>
+    <figure class="">
+    <img src="./img/map-timeline.jpg" width="988" height="703" alt="The places map filtered to Jane Doe with the timeline slider part-way through" loading="lazy">
+    <figcaption>The timeline, showing only Jane Doe's logs up to a chosen date. The ring marks the place of the most recent log.</figcaption>
+  </figure>
+    <h3 class="sub">Replay your history</h3>
+    <ol class="steps-list">
+      <li>Drag the <b>date slider</b> under the map. Pins show only the logs up to that day; places with none yet are dimmed.</li>
+      <li>Press <b>▶</b> to play the whole history in about twelve seconds. Press it again to pause.</li>
+      <li>Use <b>Show only</b> to pick one person, one tag, or both. Pins, slider and playback then follow just those logs. <b>Show all</b> resets it.</li>
+      <li><b>All time</b> returns to the full picture.</li>
+    </ol>
+    <p class="muted">The map is drawn from data inside the extension. It works offline and makes no requests.</p>
+  </section>
+  <section class="section" id="tags">
+    <h2>8. Manage tags</h2>
+    <div class="two">
+      <div>
+        <ol class="steps-list">
+          <li>Open <b>Settings → Tags → Manage</b>. Every tag on the page is listed with the number of logs that carry it.</li>
+          <li><b>Rename</b> changes a tag on every log at once. Renaming onto an existing tag asks before merging the two.</li>
+          <li><b>Delete</b> removes a tag from every log; the logs themselves stay.</li>
+          <li>To merge several, tick their boxes, press <b>Merge selected</b> and type the name to keep.</li>
+        </ol>
+        <p class="muted">Each change is one undo step, and it applies to the trash too, so a restored log never brings back an old tag. To edit one log's tags, use its details instead.</p>
+      </div>
+      <figure class="center">
+    <img src="./img/tag-manager.jpg" width="548" height="530" alt="The tag manager with two tags ticked for merging" loading="lazy">
+    <figcaption>Two tags ticked, ready to merge.</figcaption>
+  </figure>
+    </div>
+  </section>
+  <section class="section" id="settings">
+    <h2>9. Settings</h2>
+    <div class="two">
+      <figure class="center">
+    <img src="./img/settings.jpg" width="420" height="600" alt="The settings drawer showing data options: backup, places, aliases, unused photos, trash, tags and star ratings" loading="lazy">
+    <figcaption>The settings drawer, opened from the gear.</figcaption>
+  </figure>
+      <div>
+        <p class="muted">The gear at the top right of the dashboard opens Settings. Everything in it applies to the page you're viewing.</p>
+        <ul class="plain">
+          <li><b>Data</b>: export and import, places, aliases, unused photos, trash, tags, star ratings, deleting data and pages, and the backup reminder.</li>
+          <li><b>Appearance</b>: dark, light or pink theme; how many rows tables show before “show more”; which panels appear; reset layout; how fast insights rotate.</li>
+          <li><b>Privacy</b>: how many past tags the popup suggests, setting or removing a PIN, and the quick-hide page.</li>
+        </ul>
+        <h3 class="sub">Past tags in the popup</h3>
+        <p class="muted">Choose <b>None</b>, a number, or <b>All</b>. None hides your tag history from the popup entirely; All scrolls when the list is long.</p>
+      </div>
+    </div>
+  </section>
+  <section class="section" id="backup">
+    <h2>10. Backups and the reminder</h2>
+    <p class="muted">Your data lives only in this browser. Clearing the browser's data or losing the computer loses it — unless you have a backup file.</p>
+    <ol class="steps-list">
+      <li><b>Settings → Backup → Export JSON</b>. Tick the pages to include and press <b>Export</b>. A file lands in your downloads folder.</li>
+      <li>Keep the file somewhere safe. If you use a PIN, the backup is your only way back from a forgotten PIN.</li>
+      <li>To restore or move to a new computer: install Actor Tally there, then <b>Settings → Backup → Import</b>, choose the file and pick which page it lands on. Duplicates are skipped.</li>
+    </ol>
+    <figure class="">
+    <img src="./img/backup-reminder.jpg" width="1200" height="80" alt="The backup reminder bar offering Export now or Later" loading="lazy">
+    <figcaption>The reminder bar at the top of the dashboard.</figcaption>
+  </figure>
+    <div class="two">
+      <div>
+        <h3 class="sub">The backup reminder</h3>
+        <p class="muted">After a number of new logs or a number of days since your last export — whichever comes first — a bar at the top of the dashboard offers an export. It counts every page, and stays quiet when there's nothing new to save.</p>
+        <ul class="plain">
+          <li><b>Export now</b> opens the export.</li>
+          <li><b>Later</b> hides it for three days.</li>
+          <li>Change the numbers (15 logs and 30 days by default) or switch it off under <b>Settings → Backup reminder</b>.</li>
+        </ul>
+      </div>
+      <figure class="center">
+    <img src="./img/settings-data.jpg" width="420" height="600" alt="Settings showing the tags, star ratings and backup reminder rows" loading="lazy">
+    <figcaption>Backup reminder settings.</figcaption>
+  </figure>
+    </div>
+  </section>
+  <section class="section" id="pages">
+    <h2>11. Four pages, your own word</h2>
+    <ol class="steps-list">
+      <li>The numbered buttons at the top left of the dashboard switch between pages. <b>+</b> adds one, up to four.</li>
+      <li>Each page keeps its own logs, aliases, places, photos, layout and trash.</li>
+      <li>The <b>actor → ?</b> control under the banner replaces the word “actor” throughout the interface for that page — handy if you track something else.</li>
+      <li>In the popup, the page buttons at the bottom right choose where new logs go. The choice is remembered.</li>
+    </ol>
+  </section>
+  <section class="section" id="privacy">
+    <h2>12. PIN and quick hide</h2>
+    <div class="two">
+      <div>
+        <h3>Set a PIN</h3>
+        <ol class="steps-list">
+          <li><b>Settings → Set PIN</b>. Read the warning: a forgotten PIN cannot be recovered by anyone.</li>
+          <li>Choose 4–12 characters and enter it twice.</li>
+          <li>Every page is now encrypted on your device. The dashboard asks for the PIN when you open it; the popup asks once per browser session.</li>
+        </ol>
+        <p class="muted">Failed attempts are listed in the Security panel. To remove the PIN, use the same button and enter the current PIN.</p>
+      </div>
+      <figure class="center">
+    <img src="./img/pin-lock.jpg" width="360" height="234" alt="The PIN lock screen with an unlock button" loading="lazy">
+    <figcaption>The lock screen. A locked tab holds no decrypted data.</figcaption>
+  </figure>
+    </div>
+    <div class="two" style="margin-top:20px">
+      <figure class="center">
+    <img src="./img/quick-hide.jpg" width="620" height="406" alt="The quick-hide page: an ordinary editable to-do list titled Weekly Notes" loading="lazy">
+    <figcaption>Quick hide: press Esc.</figcaption>
+  </figure>
+      <div>
+        <h3>Quick hide</h3>
+        <p class="muted">Press <kbd>Esc</kbd> on the dashboard and it is replaced by an ordinary to-do list. The list is real: you can rename it and add, tick or remove items. Press <kbd>Esc</kbd> again to come back.</p>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:28px">Still stuck? The <a href="./support.html">support page</a> has quick answers and every way to reach a person.</p>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <a href="./index.html">Home</a>
+    <a href="./guide.html">Guide</a>
+    <a href="./changelog.html">What's new</a>
+    <a href="./privacy.html">Privacy Policy</a>
+    <a href="./support.html">Support</a>
+    <a href="https://t.me/actor_tally">Telegram</a>
+    <a href="https://x.com/actortally">X</a>
+    <span class="muted">— Actor Tally stores everything locally on your device and makes no network connections.</span>
+  </div>
+</footer>
+</body>
+</html>

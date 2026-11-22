@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What's new — Actor Tally</title>
+<meta name="description" content="Release notes for Actor Tally: half-star ratings, the map timeline, tag manager and backup reminder in 4.2, and everything added in 4.0.">
+<style>
+  :root{
+    --bg:#0d0f13; --panel:#14171d; --panel2:#181c23; --ink:#e8e6e1; --muted:#9aa0aa;
+    --amber:#f5a623; --amber-soft:#f5a62322; --green:#57c785; --line:#242832; --maxw:960px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  a{color:var(--amber); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 22px}
+  .narrow{max-width:780px}
+  .section{padding:60px 0; border-top:1px solid var(--line)}
+  h1{color:#fff}
+  h2{font-size:26px; margin:0 0 8px; color:#fff; line-height:1.25}
+  h3{font-size:17px; margin:0 0 6px; color:#fff}
+  p{margin:0 0 14px}
+  .muted{color:var(--muted)}
+  code,kbd{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.9em}
+  kbd{background:var(--panel2); border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:1px 6px; color:var(--ink)}
+
+  nav.top{display:flex; align-items:center; gap:12px; padding:22px 0}
+  .tally{width:32px; height:32px; flex:0 0 auto}
+  nav.top b{font-size:17px}
+  nav.top b a{color:var(--ink)}
+  nav.top .sp{flex:1}
+  nav.top a.nl{color:var(--muted); font-size:14px; margin-left:18px}
+  nav.top a.nl.on{color:var(--ink)}
+
+  .btns{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom:16px}
+  .btn{display:inline-block; padding:12px 22px; border-radius:10px; font-weight:600; font-size:15px;
+    background:var(--amber); color:#0d0f13; border:1px solid var(--amber)}
+  .btn:hover{text-decoration:none; filter:brightness(1.06)}
+  .btn.ghost{background:transparent; color:var(--muted); border:1px solid var(--line)}
+  .btn.ghost:hover{color:var(--ink); border-color:var(--muted)}
+
+  /* store buttons: live = solid, soon = dashed with a status line */
+  .stores{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:0 auto 14px; max-width:860px}
+  .store{display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; text-align:left;
+    background:var(--panel); border:1px solid var(--line); color:var(--ink); min-width:0}
+  .store:hover{text-decoration:none; border-color:var(--amber)}
+  .store svg{flex:0 0 auto; width:30px; height:30px}
+  .store .t{display:flex; flex-direction:column; line-height:1.25; min-width:0}
+  .store .t b{font-size:15px}
+  .store .t small{font-size:12px; color:var(--muted); white-space:nowrap}
+  .store .st{display:inline-flex; align-items:center; gap:6px}
+  .store .st:before{content:""; width:7px; height:7px; border-radius:50%; background:var(--green)}
+  .store.live{border-color:#f5a62366}
+  .store.soon{border-style:dashed; cursor:default}
+  .store.soon:hover{border-color:var(--line)}
+  .store.soon svg{opacity:.55}
+  .store.soon .st:before{background:transparent; border:1.5px solid var(--amber)}
+  .stores-note{font-size:13px; color:var(--muted); max-width:70ch; margin:0 auto}
+
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:24px}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px 22px}
+  .card p{margin:0; color:var(--muted); font-size:15px}
+  .card h3{margin-bottom:8px}
+  .card .tag{display:inline-block; font-size:11px; font-weight:700; letter-spacing:.6px; color:var(--amber);
+    background:var(--amber-soft); border-radius:5px; padding:1px 7px; margin-bottom:8px}
+
+  ul.plain{list-style:none; padding:0; margin:14px 0 0}
+  ul.plain li{position:relative; padding-left:20px; margin:0 0 10px; color:var(--muted)}
+  ul.plain li:before{content:""; position:absolute; left:0; top:11px; width:7px; height:7px; background:var(--amber); border-radius:2px}
+  ul.plain b{color:var(--ink)}
+  .feat{columns:2; column-gap:34px}
+  .feat li{break-inside:avoid}
+
+  figure{margin:22px 0; }
+  figure img{display:block; max-width:100%; height:auto; border-radius:12px; border:1px solid var(--line); background:var(--panel)}
+  figure.center img{margin:0 auto}
+  figure.mid img{max-width:560px; margin:0 auto}
+  figure.mid figcaption{text-align:center}
+  figcaption{font-size:13px; color:var(--muted); margin-top:8px}
+  figure.center figcaption{text-align:center}
+  .shots{display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:start; margin:30px 0 0}
+  .shots figure{margin:0}
+
+  ol.steps-list{counter-reset:s; list-style:none; padding:0; margin:14px 0 18px}
+  ol.steps-list>li{counter-increment:s; position:relative; padding:0 0 0 40px; margin:0 0 12px; color:var(--muted)}
+  ol.steps-list>li:before{content:counter(s); position:absolute; left:0; top:1px; width:26px; height:26px; border-radius:50%;
+    background:var(--amber-soft); color:var(--amber); font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center}
+  ol.steps-list b{color:var(--ink)}
+  .tip{background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--amber); border-radius:10px; padding:12px 16px; margin:16px 0; color:var(--muted); font-size:15px}
+  .tip b{color:var(--ink)}
+
+  details{border:1px solid var(--line); border-radius:10px; padding:14px 18px; margin:0 0 10px; background:var(--panel)}
+  details summary{cursor:pointer; font-weight:600; color:#fff; list-style:none}
+  details summary::-webkit-details-marker{display:none}
+  details summary:before{content:"+"; color:var(--amber); font-weight:700; margin-right:10px}
+  details[open] summary:before{content:"–"}
+  details p{margin:12px 0 0; color:var(--muted); font-size:15px}
+
+  footer{border-top:1px solid var(--line); padding:30px 0 60px; color:var(--muted); font-size:13px}
+  footer a{color:var(--muted); text-decoration:underline; margin-right:16px}
+
+  @media(max-width:860px){ .stores{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  @media(max-width:720px){
+    .grid{grid-template-columns:1fr}
+    .feat{columns:1}
+    .shots{grid-template-columns:1fr}
+    .shots figure.popup img{max-width:300px}
+    nav.top{flex-wrap:wrap; row-gap:2px}
+    nav.top .sp{flex-basis:100%; height:0}
+    nav.top a.nl{margin:2px 14px 0 0; font-size:13px}
+  }
+  @media(max-width:420px){ .stores{grid-template-columns:1fr} }
+
+  .hero{padding:44px 0 20px}
+  .hero h1{font-size:36px; margin:0 0 10px}
+  .rel{border-top:1px solid var(--line); padding:40px 0}
+  .rel h2{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+  .rel h2 small{font-size:14px; color:var(--muted); font-weight:400}
+  .rel h3{margin:24px 0 4px}
+  .rel ul.plain{margin-top:8px}
+
+</style>
+</head>
+<body>
+<div class="wrap narrow">
+  <nav class="top">
+    <svg class="tally" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="40" height="40" rx="9" fill="#14171d"/>
+      <g stroke="#f5a623" stroke-width="2.6" stroke-linecap="round">
+        <line x1="12" y1="11" x2="12" y2="29"/><line x1="17" y1="11" x2="17" y2="29"/>
+        <line x1="22" y1="11" x2="22" y2="29"/><line x1="27" y1="11" x2="27" y2="29"/>
+        <line x1="9" y1="29" x2="30" y2="11"/>
+      </g>
+    </svg>
+    <b><a href="./index.html">Actor Tally</a></b>
+    <span class="sp"></span>
+    <a class="nl" href="./guide.html">Guide</a>
+    <a class="nl on" href="./changelog.html">What's new</a>
+    <a class="nl" href="./privacy.html">Privacy</a>
+    <a class="nl" href="./support.html">Support</a>
+  </nav>
+  <header class="hero">
+    <h1>What's new</h1>
+    <p class="muted">Every release of Actor Tally, newest first. Updates arrive automatically through your browser's store.</p>
+  </header>
+
+  <section class="rel" id="v4-2">
+    <h2>4.2 <small>November 2026</small></h2>
+    <p class="muted">The jump from 4.0 includes everything built for 4.1, which never shipped separately.</p>
+    <h3>New</h3>
+    <ul class="plain">
+      <li><b>Half-star ratings.</b> Click a star once for the whole value, again for a half, a third time to clear. Charts, filters, editors, bulk edit and imports all accept halves.</li>
+      <li><b>Map timeline.</b> A date slider and play button under the places map replay where your logging happened. Places with no logs yet are dimmed; the latest one carries a ring.</li>
+      <li><b>Map filter.</b> Replay just one person, one tag, or both.</li>
+      <li><b>Tag manager.</b> Rename or delete a tag across every log of a page, or tick several and merge them into one. One undo step each.</li>
+      <li><b>Backup reminder.</b> After a number of new logs or days without an export (15 and 30 by default, whichever comes first), the dashboard offers one. Adjustable, can be snoozed or switched off.</li>
+      <li><b>Past tags in the popup.</b> Choose how many to show, from none to all.</li>
+      <li><b>Delete all ratings</b> for a page in one step, with undo.</li>
+      <li><b>Microsoft Edge Add-ons.</b> Now listed on Edge. Firefox and Opera listings are in review.</li>
+    </ul>
+    <h3>Improved</h3>
+    <ul class="plain">
+      <li>More of the interface is translated in all seven languages: chip tooltips in the popup, progress labels under Upcoming charts, alias placeholders and several tooltips.</li>
+      <li>“Rate Actor Tally” and the store row in “Report a bug” open the store you installed from.</li>
+      <li>Exports and image downloads use one routine that works reliably in every browser.</li>
+      <li>The panel drag handle works in Firefox too.</li>
+    </ul>
+    <h3>Fixed</h3>
+    <ul class="plain">
+      <li>Milestones counted names instead of logs, so one log with three people moved them three steps. They now count logs, and step back when logs are deleted.</li>
+      <li>With the dashboard open, a log made in the popup didn't show until a reload — and the dashboard's next edit could overwrite it. The dashboard now picks it up immediately.</li>
+      <li>Settings changed in the popup (a running stopwatch, the last place) could be undone by a change on an open dashboard.</li>
+      <li>Tags typed in the popup, the manual form or bulk edit are now stored the same way: lower case, no duplicates on one log.</li>
+      <li>Deleting a page now carries the monthly goal over to the page that takes its number.</li>
+    </ul>
+  </section>
+
+  <section class="rel" id="v4-0">
+    <h2>4.0 <small>August 2026</small></h2>
+    <ul class="plain">
+      <li><b>Insights</b> — a rotating line of plain-language observations about your history.</li>
+      <li><b>Chart builder</b> — seven measures across fourteen groupings, as a line, bar or area, optionally through your filters; save any chart as an image.</li>
+      <li><b>Time spent</b> — durations typed or timed with the stopwatch, with totals, a distribution and a monthly trend.</li>
+      <li><b>Places</b> — label a log with where you were; places with coordinates appear on an offline world map.</li>
+      <li><b>Co-stars</b> — mark who was billed as a co-star; its own filter, chart grouping and badge.</li>
+      <li><b>Video position</b> — optionally record how far into a video you were.</li>
+      <li><b>Add a log manually</b> — for things watched elsewhere, with their own date and time.</li>
+      <li><b>Everything is editable</b> — every field of every log, from its details window.</li>
+      <li><b>Per-day breakdown</b> between two dates and a <b>weekday × hour heatmap</b>.</li>
+      <li><b>Settings drawer</b> — pink theme, banners, panel visibility, drag-to-reorder layout, row limits; monthly goal ring, day streaks, tally marks as an image.</li>
+      <li><b>Redo</b> alongside twenty steps of undo, and a <b>Report a bug</b> button.</li>
+      <li><b>Four pages</b> in one install, each with its own word for “actor”.</li>
+    </ul>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <a href="./index.html">Home</a>
+    <a href="./guide.html">Guide</a>
+    <a href="./changelog.html">What's new</a>
+    <a href="./privacy.html">Privacy Policy</a>
+    <a href="./support.html">Support</a>
+    <a href="https://t.me/actor_tally">Telegram</a>
+    <a href="https://x.com/actortally">X</a>
+    <span class="muted">— Actor Tally stores everything locally on your device and makes no network connections.</span>
+  </div>
+</footer>
+</body>
+</html>

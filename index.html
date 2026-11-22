@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actor Tally — Private, Local-Only Viewing Tracker &amp; Analytics</title>
+<meta name="description" content="Log which actors appear in the videos you watch. 100% on-device, zero network access, no account. Half-star ratings, a replayable places map, a chart builder, heatmaps, badges and a yearly recap — on Chrome and Edge, with Firefox and Opera coming.">
+<style>
+  :root{
+    --bg:#0d0f13; --panel:#14171d; --panel2:#181c23; --ink:#e8e6e1; --muted:#9aa0aa;
+    --amber:#f5a623; --amber-soft:#f5a62322; --green:#57c785; --line:#242832; --maxw:960px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  a{color:var(--amber); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 22px}
+  .narrow{max-width:780px}
+  .section{padding:60px 0; border-top:1px solid var(--line)}
+  h1{color:#fff}
+  h2{font-size:26px; margin:0 0 8px; color:#fff; line-height:1.25}
+  h3{font-size:17px; margin:0 0 6px; color:#fff}
+  p{margin:0 0 14px}
+  .muted{color:var(--muted)}
+  code,kbd{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.9em}
+  kbd{background:var(--panel2); border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:1px 6px; color:var(--ink)}
+
+  nav.top{display:flex; align-items:center; gap:12px; padding:22px 0}
+  .tally{width:32px; height:32px; flex:0 0 auto}
+  nav.top b{font-size:17px}
+  nav.top b a{color:var(--ink)}
+  nav.top .sp{flex:1}
+  nav.top a.nl{color:var(--muted); font-size:14px; margin-left:18px}
+  nav.top a.nl.on{color:var(--ink)}
+
+  .btns{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom:16px}
+  .btn{display:inline-block; padding:12px 22px; border-radius:10px; font-weight:600; font-size:15px;
+    background:var(--amber); color:#0d0f13; border:1px solid var(--amber)}
+  .btn:hover{text-decoration:none; filter:brightness(1.06)}
+  .btn.ghost{background:transparent; color:var(--muted); border:1px solid var(--line)}
+  .btn.ghost:hover{color:var(--ink); border-color:var(--muted)}
+
+  /* store buttons: live = solid, soon = dashed with a status line */
+  .stores{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:0 auto 14px; max-width:860px}
+  .store{display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; text-align:left;
+    background:var(--panel); border:1px solid var(--line); color:var(--ink); min-width:0}
+  .store:hover{text-decoration:none; border-color:var(--amber)}
+  .store svg{flex:0 0 auto; width:30px; height:30px}
+  .store .t{display:flex; flex-direction:column; line-height:1.25; min-width:0}
+  .store .t b{font-size:15px}
+  .store .t small{font-size:12px; color:var(--muted); white-space:nowrap}
+  .store .st{display:inline-flex; align-items:center; gap:6px}
+  .store .st:before{content:""; width:7px; height:7px; border-radius:50%; background:var(--green)}
+  .store.live{border-color:#f5a62366}
+  .store.soon{border-style:dashed; cursor:default}
+  .store.soon:hover{border-color:var(--line)}
+  .store.soon svg{opacity:.55}
+  .store.soon .st:before{background:transparent; border:1.5px solid var(--amber)}
+  .stores-note{font-size:13px; color:var(--muted); max-width:70ch; margin:0 auto}
+
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:24px}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px 22px}
+  .card p{margin:0; color:var(--muted); font-size:15px}
+  .card h3{margin-bottom:8px}
+  .card .tag{display:inline-block; font-size:11px; font-weight:700; letter-spacing:.6px; color:var(--amber);
+    background:var(--amber-soft); border-radius:5px; padding:1px 7px; margin-bottom:8px}
+
+  ul.plain{list-style:none; padding:0; margin:14px 0 0}
+  ul.plain li{position:relative; padding-left:20px; margin:0 0 10px; color:var(--muted)}
+  ul.plain li:before{content:""; position:absolute; left:0; top:11px; width:7px; height:7px; background:var(--amber); border-radius:2px}
+  ul.plain b{color:var(--ink)}
+  .feat{columns:2; column-gap:34px}
+  .feat li{break-inside:avoid}
+
+  figure{margin:22px 0; }
+  figure img{display:block; max-width:100%; height:auto; border-radius:12px; border:1px solid var(--line); background:var(--panel)}
+  figure.center img{margin:0 auto}
+  figure.mid img{max-width:560px; margin:0 auto}
+  figure.mid figcaption{text-align:center}
+  figcaption{font-size:13px; color:var(--muted); margin-top:8px}
+  figure.center figcaption{text-align:center}
+  .shots{display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:start; margin:30px 0 0}
+  .shots figure{margin:0}
+
+  ol.steps-list{counter-reset:s; list-style:none; padding:0; margin:14px 0 18px}
+  ol.steps-list>li{counter-increment:s; position:relative; padding:0 0 0 40px; margin:0 0 12px; color:var(--muted)}
+  ol.steps-list>li:before{content:counter(s); position:absolute; left:0; top:1px; width:26px; height:26px; border-radius:50%;
+    background:var(--amber-soft); color:var(--amber); font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center}
+  ol.steps-list b{color:var(--ink)}
+  .tip{background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--amber); border-radius:10px; padding:12px 16px; margin:16px 0; color:var(--muted); font-size:15px}
+  .tip b{color:var(--ink)}
+
+  details{border:1px solid var(--line); border-radius:10px; padding:14px 18px; margin:0 0 10px; background:var(--panel)}
+  details summary{cursor:pointer; font-weight:600; color:#fff; list-style:none}
+  details summary::-webkit-details-marker{display:none}
+  details summary:before{content:"+"; color:var(--amber); font-weight:700; margin-right:10px}
+  details[open] summary:before{content:"–"}
+  details p{margin:12px 0 0; color:var(--muted); font-size:15px}
+
+  footer{border-top:1px solid var(--line); padding:30px 0 60px; color:var(--muted); font-size:13px}
+  footer a{color:var(--muted); text-decoration:underline; margin-right:16px}
+
+  @media(max-width:860px){ .stores{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  @media(max-width:720px){
+    .grid{grid-template-columns:1fr}
+    .feat{columns:1}
+    .shots{grid-template-columns:1fr}
+    .shots figure.popup img{max-width:300px}
+    nav.top{flex-wrap:wrap; row-gap:2px}
+    nav.top .sp{flex-basis:100%; height:0}
+    nav.top a.nl{margin:2px 14px 0 0; font-size:13px}
+  }
+  @media(max-width:420px){ .stores{grid-template-columns:1fr} }
+
+  .hero{padding:56px 0 50px; text-align:center}
+  .hero h1{font-size:40px; line-height:1.15; margin:0 auto 16px; max-width:16ch}
+  .hero p.lead{font-size:18px; color:var(--muted); max-width:56ch; margin:0 auto 28px}
+  .hero .fine{font-size:13px; color:var(--muted); margin:10px 0 0}
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:20px}
+  .step{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px}
+  .step .n{color:var(--amber); font-weight:700; font-size:14px; letter-spacing:.5px}
+  .support .btns{justify-content:flex-start}
+  .langs{color:var(--muted); font-size:14px; letter-spacing:.3px}
+  .gallery{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:22px}
+  .gallery figure{margin:0}
+  @media(max-width:720px){ .hero h1{font-size:30px} .steps,.gallery{grid-template-columns:1fr} }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="top">
+    <svg class="tally" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="40" height="40" rx="9" fill="#14171d"/>
+      <g stroke="#f5a623" stroke-width="2.6" stroke-linecap="round">
+        <line x1="12" y1="11" x2="12" y2="29"/><line x1="17" y1="11" x2="17" y2="29"/>
+        <line x1="22" y1="11" x2="22" y2="29"/><line x1="27" y1="11" x2="27" y2="29"/>
+        <line x1="9" y1="29" x2="30" y2="11"/>
+      </g>
+    </svg>
+    <b><a href="./index.html">Actor Tally</a></b>
+    <span class="sp"></span>
+    <a class="nl" href="#how">How it works</a>
+    <a class="nl" href="./guide.html">Guide</a>
+    <a class="nl" href="#new">What's new</a>
+    <a class="nl" href="#trust">Privacy</a>
+    <a class="nl" href="#faq">FAQ</a>
+    <a class="nl" href="./support.html">Support</a>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <h1>Your log. Your device. Nobody else's.</h1>
+    <p class="lead">Actor Tally is a private tally counter for people who watch a lot of video. One click logs who you just watched. Over time, you get a personal analytics dashboard nobody else can see — because, by design, nobody else <em>can</em>.</p>
+    <div class="stores">
+      <a class="store live" id="chrome-link" href="https://chromewebstore.google.com/detail/odpeanknkiiidhinhgnpkpablhhobbhe"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M6 11h5a3 3 0 1 1 6 0h5v5a3 3 0 1 1 0 6v5H17a3 3 0 1 0-6 0H6v-5a3 3 0 1 0 0-6z" transform="translate(1 -2)"/></svg><span class="t"><b>Chrome</b><small class="st">Chrome Web Store</small></span></a>
+      <a class="store live" id="edge-link" href="https://microsoftedge.microsoft.com/addons/detail/actor-tally/iocpmmkcjhdlaicbidalhcfhmjaicico"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M6 11h5a3 3 0 1 1 6 0h5v5a3 3 0 1 1 0 6v5H17a3 3 0 1 0-6 0H6v-5a3 3 0 1 0 0-6z" transform="translate(1 -2)"/></svg><span class="t"><b>Edge</b><small class="st">Edge Add-ons</small></span></a>
+      <!-- When Firefox is approved: change <span class="store soon" ...> to
+           <a class="store live" id="firefox-link" href="LISTING URL"> (and </span> to </a>),
+           and the small text to "Firefox Add-ons". The URL is shown on the add-on's page in the Developer Hub. -->
+      <span class="store soon" id="firefox-link" title="Submitted — waiting for Mozilla's review"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M6 11h5a3 3 0 1 1 6 0h5v5a3 3 0 1 1 0 6v5H17a3 3 0 1 0-6 0H6v-5a3 3 0 1 0 0-6z" transform="translate(1 -2)"/></svg><span class="t"><b>Firefox</b><small class="st">In review</small></span></span>
+      <!-- When Opera is approved: same change, URL https://addons.opera.com/extensions/details/actor-tally/ -->
+      <span class="store soon" id="opera-link" title="Submitted — waiting for Opera's review"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M6 11h5a3 3 0 1 1 6 0h5v5a3 3 0 1 1 0 6v5H17a3 3 0 1 0-6 0H6v-5a3 3 0 1 0 0-6z" transform="translate(1 -2)"/></svg><span class="t"><b>Opera</b><small class="st">In review</small></span></span>
+    </div>
+    <p class="stores-note">Brave, Vivaldi and most other Chromium-based browsers install it from the Chrome Web Store. Opera users can already do the same with Opera's “Install Chrome Extensions” add-on while the Opera listing is in review.</p>
+    <p class="fine">Free · No account · No ads · Zero network access — verifiably.</p>
+    <p class="fine" style="margin-top:2px">Version 4.2 · Seven languages · Four permissions, no host access.</p>
+  </header>
+
+  <div class="shots">
+    <figure class="popup">
+    <img src="./img/popup.jpg" width="360" height="560" alt="The Actor Tally popup on a video page: detected names, a three-and-a-half star rating and tag suggestions" loading="lazy">
+    <figcaption>The popup: tap a detected name, rate, tag, log.</figcaption>
+  </figure>
+    <figure class="">
+    <img src="./img/map-timeline.jpg" width="988" height="703" alt="The places map on the dashboard, replaying one person's logs with a timeline slider" loading="lazy">
+    <figcaption>The dashboard's places map, replaying one person's history.</figcaption>
+  </figure>
+  </div>
+
+  <!-- TRUST -->
+  <section class="section" id="trust" style="margin-top:50px">
+    <h2>Not "we don't look." <span style="color:var(--amber)">Can't look.</span></h2>
+    <p class="muted" style="max-width:64ch">Most apps ask you to trust a privacy policy. Actor Tally doesn't ask you to trust anything — the extension contains no code that can connect to the internet. No server, no account, no analytics. Every entry lives in your browser's local storage on your device, and there is no mechanism by which anyone — including the developer — could read it.</p>
+    <div class="grid">
+      <div class="card"><h3>Verifiable, not promised</h3><p>Anyone technical enough to open the extension's code can confirm there is no network call in it. That's the entire architecture. On Firefox the add-on also declares, in its manifest, that it collects no data.</p></div>
+      <div class="card"><h3>Locked, if you want it</h3><p>Set a PIN and your data is properly encrypted at rest (PBKDF2 + AES-256-GCM via your browser's built-in Web Crypto) — not just hidden behind a lock screen. A locked tab holds nothing decrypted in memory at all. Press Esc and the dashboard becomes an ordinary, editable to-do list.</p></div>
+      <div class="card"><h3>Yours to keep</h3><p>Full export and import, a 30-day recoverable trash, twenty steps of undo <em>and</em> redo, and a reminder to back up when it's been a while — because your data exists nowhere else. Your history moves to a new computer as a file you carry, not an account someone hosts.</p></div>
+      <div class="card"><h3>No dark patterns</h3><p>No guilt-trip streaks, no fake scarcity, no notifications. Because it can't connect to anything, there are no ads and never will be.</p></div>
+    </div>
+  </section>
+
+  <!-- HOW -->
+  <section class="section" id="how">
+    <h2>Log someone in three seconds</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1 · CLICK</div><p class="muted">On any video page, click the icon (or press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd>). It reads the page — title, cast links, metadata — and suggests likely names, ranked by confidence.</p></div>
+      <div class="step"><div class="n">2 · TAP</div><p class="muted">Tap the right name, or several — tap twice to mark a co-star. Not listed? Start typing and it autocompletes from everyone you've logged before. Rate in half stars, add tags.</p></div>
+      <div class="step"><div class="n">3 · DONE</div><p class="muted">One tap logs it, with a running count. You never leave the page. A manual picker handles sites that defeat automatic detection.</p></div>
+    </div>
+    <p class="muted" style="margin-top:18px">A log can carry as much or as little as you like: a star rating (half stars too), tags, who was billed as a <b style="color:var(--ink)">co-star</b>, how long you watched (typed, or timed with the built-in stopwatch), a <b style="color:var(--ink)">place</b>, and — if you turn it on — <b style="color:var(--ink)">how far into the video you were</b>. Watched something on your phone or your TV? Add it by hand from the dashboard; it becomes an ordinary log.</p>
+    <p class="muted">New here? The <a href="./guide.html">step-by-step guide</a> walks through every feature with pictures.</p>
+  </section>
+
+  <!-- WHAT'S NEW -->
+  <section class="section" id="new">
+    <h2>New in 4.2</h2>
+    <p class="muted" style="max-width:64ch">Version 4.0 taught Actor Tally to read your history back. 4.2 makes that history easier to keep tidy — and replays it on the map.</p>
+    <div class="grid">
+      <div class="card"><h3>Half-star ratings</h3><p>Click a star once for the whole value, again for a half, a third time to clear. Every chart, filter and editor understands halves.</p></div>
+      <div class="card"><h3>Map timeline</h3><p>A date slider and a play button under the places map replay where your logging happened, day by day. Narrow it to one person or one tag and watch just their history unfold.</p></div>
+      <div class="card"><h3>Tag clean-up</h3><p>Rename a tag, delete it, or tick several and merge them into one — across every log in one step, with undo.</p></div>
+      <div class="card"><h3>Backup reminder</h3><p>After a number of new logs or days you choose (15 logs or 30 days by default), the dashboard offers an export. Snooze it, adjust it, or switch it off in Settings.</p></div>
+      <div class="card"><h3>Past tags, your way</h3><p>Choose how many of your tags the popup suggests — from none to all of them. “None” keeps your tag history out of sight while you log.</p></div>
+      <div class="card"><h3>Now on Edge</h3><p>Actor Tally is live on Microsoft Edge Add-ons, with Firefox and Opera in store review. Same extension, same zero-network design, on every browser.</p></div>
+    </div>
+    <p class="muted" style="margin-top:18px">Also: clear every star rating at once, more of the interface translated, and fixes — milestones count logs rather than names and step back when you delete, an open dashboard picks up logs made in the popup instantly, and tags are saved consistently. Full details in the <a href="./changelog.html">changelog</a>.</p>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="section" id="see">
+    <h2>See it</h2>
+    <p class="muted">Real screenshots, with made-up demo data.</p>
+    <div class="gallery">
+      <figure class="">
+    <img src="./img/heatmap.jpg" width="988" height="292" alt="The activity calendar colouring each day by how much was logged" loading="lazy">
+    <figcaption>Activity calendar: your busiest days.</figcaption>
+  </figure>
+      <figure class="">
+    <img src="./img/explore.jpg" width="988" height="759" alt="The Explore panel with tag, actor, site, rating, co-star, length, place and time-of-day filters" loading="lazy">
+    <figcaption>Explore: click anything to filter.</figcaption>
+  </figure>
+      <figure class="">
+    <img src="./img/cards.jpg" width="988" height="640" alt="Actor cards showing counts, average ratings, badges and recent tags" loading="lazy">
+    <figcaption>Cards, not rows.</figcaption>
+  </figure>
+      <figure class="">
+    <img src="./img/builder.jpg" width="988" height="500" alt="The chart builder showing logs per month as bars" loading="lazy">
+    <figcaption>Chart builder: your own question.</figcaption>
+  </figure>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section class="section">
+    <h2>A real analytics dashboard</h2>
+    <p class="muted">Everything you log feeds a full dashboard in its own tab:</p>
+    <ul class="feat plain">
+      <li><b>Leaderboard</b> of your most-logged people</li>
+      <li><b>Calendar heatmap</b> of your busiest days</li>
+      <li><b>When you log</b> — a weekday × hour heatmap</li>
+      <li><b>Per-day breakdown</b> between any two dates</li>
+      <li><b>By site</b> and <b>month by month</b> — new vs repeat actors</li>
+      <li><b>Time spent</b> — totals, length distribution, monthly trend</li>
+      <li><b>Chart builder</b> — 7 measures × 14 groupings, your question</li>
+      <li><b>Insights</b> — plain-language observations, rotating</li>
+      <li><b>Places map</b> — offline world map with a replayable timeline</li>
+      <li><b>Personal records</b> — biggest day, biggest month, longest gap</li>
+      <li><b>Badges and milestones</b> as your collection grows</li>
+      <li><b>Cards, not rows</b> — each person with count, rating, tags, photo</li>
+      <li><b>Everything clickable</b> — filter by tag, name, site, rating, co-star, place, length or time of day</li>
+      <li><b>Log count</b> as tally marks, exportable as an image</li>
+      <li><b>Monthly goal</b> ring and day streaks</li>
+      <li><b>Compare with a friend</b> — from a file you both choose to share</li>
+      <li><b>Yearly recap</b> — a shareable visual summary of your year</li>
+    </ul>
+    <p class="muted" style="margin-top:16px">Every number counts a <em>log</em>, not a name: a single scene with three performers is one entry in your day count, your streak and your heatmap — and three appearances only where appearances are what's being counted.</p>
+  </section>
+
+  <!-- PAGES -->
+  <section class="section">
+    <h2>Four logs, one install</h2>
+    <p class="muted" style="max-width:64ch">Keep separate histories side by side — up to four, each with its own entries, aliases, places, photos and trash. Each page can be renamed, and the word “actor” itself can be replaced throughout the interface with whatever word fits what you're tracking. The popup remembers which page you're logging into; the dashboard switches with one click.</p>
+  </section>
+
+  <!-- LANGUAGES -->
+  <section class="section">
+    <h2>Seven languages, one standard</h2>
+    <p class="langs">English · Türkçe · Русский · العربية · Español · Français · 日本語</p>
+    <p class="muted" style="margin-top:10px">Arabic ships with a fully mirrored right-to-left layout — not translated text bolted onto a left-to-right design. Actor Tally was built as an international product from day one.</p>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <h2>Questions</h2>
+    <details><summary>Is it really free?</summary><p>Yes — fully free, nothing gated, no trial, no premium tier. If it's useful, there's an optional donation link below. Donating changes nothing about what the tool does.</p></details>
+    <details><summary>Which browsers does it run on?</summary><p>Chrome and Microsoft Edge today, from their official stores. Firefox and Opera listings are in store review. Brave, Vivaldi and most other Chromium-based browsers install it from the Chrome Web Store, and Opera can too, with Opera's “Install Chrome Extensions” add-on.</p></details>
+    <details><summary>Where exactly is my data?</summary><p>In your browser's local extension storage, on your device. Nowhere else. There is no cloud copy — so back it up with Export if it matters to you. The backup reminder will nudge you; you set how often.</p></details>
+    <details><summary>What if I forget my PIN?</summary><p>Your data is encrypted with keys derived from your PIN, on your device. Nobody can recover it — not even the developer. Keep an exported backup somewhere safe.</p></details>
+    <details><summary>Does it slow down my browser?</summary><p>No. It does nothing in the background — it runs only in the moment you click it.</p></details>
+    <details><summary>How do I verify the zero-network claim?</summary><p>Open your browser's extension page, inspect the source, and look for any network call — fetch, XHR, WebSocket, beacon. You won't find one. Or watch the network panel while using it: silence.</p></details>
+    <details><summary>How do half stars work?</summary><p>Click a star once for the whole value, click the same star again to turn it into a half (four becomes three and a half), and a third time to clear. The same works in the dashboard's rating editor and the manual log form; bulk edit accepts typed values like <code>3.5</code>.</p></details>
+    <details><summary>I logged something wrong. Can I fix it?</summary><p>All of it. Open a log's details and edit its date and time, rating, site, title, link, actors, tags, place, duration or video position. Undo and redo go twenty steps, and deleted logs sit in the trash for 30 days.</p></details>
+    <details><summary>Can I rename or merge tags?</summary><p>Yes — Settings → Tags → Manage. Rename or delete any tag across every log on the page, or tick several and merge them into one. One undo reverses the whole change.</p></details>
+    <details><summary>Does the map download anything?</summary><p>No. The world map is a compressed vector dataset (public-domain Natural Earth) that ships inside the extension and is decoded on your machine. Like everything else here, it works with the network unplugged.</p></details>
+    <details><summary>Upgrading from 4.0 — do I lose anything?</summary><p>No. Your logs, aliases, photos, places and settings carry over as they are; whole-star ratings stay whole. Exporting a backup before any upgrade is still a good habit.</p></details>
+  </section>
+
+  <!-- SUPPORT -->
+  <section class="section support">
+    <h2>Keep it free, keep it yours</h2>
+    <p class="muted">Actor Tally has no ads and no premium tier — on purpose. If it earns a place in your browser, you can support development. The Telegram channel is also where updates are announced — the extension itself will never notify you of anything, because it can't.</p>
+    <div class="btns">
+      <a class="btn" href="https://patreon.com/ActorTally">Patreon</a>
+      <a class="btn ghost" href="https://t.me/actor_tally">Telegram channel</a>
+      <a class="btn ghost" href="https://x.com/actortally">X · @actortally</a>
+    </div>
+    <p class="muted" style="margin-top:16px">Found a bug? The dashboard has a <b style="color:var(--ink)">Report a bug</b> button in its footer that opens Telegram, X or the support page of the store you installed from — or write from the <a href="./support.html">support page</a>. Nothing is sent automatically; you write the message yourself.</p>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <a href="./index.html">Home</a>
+    <a href="./guide.html">Guide</a>
+    <a href="./changelog.html">What's new</a>
+    <a href="./privacy.html">Privacy Policy</a>
+    <a href="./support.html">Support</a>
+    <a href="https://t.me/actor_tally">Telegram</a>
+    <a href="https://x.com/actortally">X</a>
+    <span class="muted">— Actor Tally stores everything locally on your device and makes no network connections.</span>
+  </div>
+</footer>
+</body>
+</html>
